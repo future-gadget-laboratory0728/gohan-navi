@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GOhan NAVI">
+    <title>GOhan NAVI - ご飯の案内人</title>
+    <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;GOhan NAVI&quot;,&quot;short_name&quot;:&quot;GOhan&quot;,&quot;start_url&quot;:&quot;./&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#ffffff&quot;,&quot;theme_color&quot;:&quot;#d4a574&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23d4a574' width='192' height='192'/><text x='96' y='120' font-size='100' text-anchor='middle' fill='white' font-family='Arial'>🍽️</text></svg>&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            transition: all 0.5s ease;
+            background: linear-gradient(135deg, #fef5e7 0%, #f4e4c1 50%, #fef5e7 100%);
+        }
+
+        body.night-mode {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ===== ヘッダー ===== */
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 16px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+            color: #1a3a1a;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode h1 {
+            background: linear-gradient(90deg, #d4a574 0%, #ffffff 50%, #d4a574 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            display: none;
+        }
+
+        .description {
+            color: #666;
+            font-size: 0.85em;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .description {
+            color: #bbb;
+        }
+
+        .today-info {
+            margin-top: 10px;
+            font-size: 0.8em;
+            color: #999;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .today-info {
+            color: #888;
+        }
+
+        /* ===== 検索・フィルターエリア ===== */
+        .controls-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 35px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .controls-section {
+            background: #2d2d2d;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 240px;
+            padding: 12px 16px;
+            font-size: 1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            background: white;
+            color: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .search-input {
+            background: #1a1a1a;
+            color: white;
+            border-color: #444;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #d4a574;
+            box-shadow: 0 0 8px rgba(212, 165, 116, 0.2);
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 14px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .filter-btn {
+            background: #1a1a1a;
+            border-color: #444;
+            color: #ccc;
+        }
+
+        .filter-btn:hover {
+            border-color: #d4a574;
+            color: #d4a574;
+        }
+
+        .filter-btn.active {
+            background: #d4a574;
+            color: white;
+            border-color: #d4a574;
+        }
+
+        /* ===== ギャラリーグリッド ===== */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 120px;
+        }
+
+        /* ===== カード ===== */
+        .restaurant-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        body.night-mode .restaurant-card {
+            background: #2d2d2d;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .restaurant-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        }
+
+        .restaurant-card.closed-today {
+            opacity: 0.5;
+        }
+
+        .restaurant-card.hidden {
+            opacity: 0.5;
+        }
+
+        .closed-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #999;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            z-index: 20;
+        }
+
+        .hidden-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #999;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            z-index: 20;
+        }
+
+        .edit-btn {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(212, 165, 116, 0.9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75em;
+            font-weight: 700;
+            cursor: pointer;
+            z-index: 20;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn:hover {
+            background: #d4a574;
+        }
+
+        /* ===== 画像カルーセル ===== */
+        .image-carousel {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            background: linear-gradient(135deg, #f0e6d2 0%, #e8dcc8 100%);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .image-carousel {
+            background: linear-gradient(135deg, #444 0%, #333 100%);
+        }
+
+        .carousel-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .carousel-nav {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .carousel-dot.active {
+            background: white;
+            width: 20px;
+            border-radius: 4px;
+        }
+
+        .carousel-prev, .carousel-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+
+        .carousel-prev { left: 10px; }
+        .carousel-next { right: 10px; }
+
+        .carousel-prev:hover, .carousel-next:hover {
+            background: rgba(0,0,0,0.6);
+        }
+
+        /* ===== カードコンテンツ ===== */
+        .card-content {
+            padding: 22px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .restaurant-name {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .restaurant-name {
+            color: white;
+        }
+
+        .genre-badge {
+            display: inline-block;
+            background: #d4a574;
+            color: white;
+            padding: 4px 11px;
+            border-radius: 16px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .card-info {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .card-info {
+            color: #bbb;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .info-icon {
+            font-size: 1em;
+            min-width: 18px;
+            margin-top: 2px;
+        }
+
+        .budget-indicator {
+            font-weight: 700;
+            color: #d4a574;
+            font-size: 1.05em;
+        }
+
+        .tap-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .tap-link {
+            color: #66b3ff;
+        }
+
+        .phone-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .phone-link {
+            color: #66b3ff;
+        }
+
+        .map-container {
+            margin: 16px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 250px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.9em;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .map-container {
+            background: #444;
+            color: #888;
+        }
+
+        /* ===== メニュー表示 ===== */
+        .menu-section {
+            margin: 12px 0;
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #d4a574;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .menu-section {
+            background: #1a1a1a;
+        }
+
+        .menu-title {
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .menu-title {
+            color: white;
+        }
+
+        .menu-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+        }
+
+        .menu-thumbnail {
+            width: 100%;
+            height: 80px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* ===== 備考（スクロール対応） ===== */
+        .memo-section {
+            background: #fafafa;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0 0 0;
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.6;
+            border-left: 3px solid #d4a574;
+            transition: all 0.5s ease;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        body.night-mode .memo-section {
+            background: #1a1a1a;
+            color: #bbb;
+        }
+
+        /* ===== 浮遊ボタン ===== */
+        .floating-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .fab-add {
+            background: #d4a574;
+            color: white;
+        }
+
+        .fab-add:active {
+            transform: scale(0.95);
+        }
+
+        /* ===== エンプティステート ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .empty-state {
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3.5em;
+            margin-bottom: 16px;
+        }
+
+        /* ===== モーダル ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            border-radius: 20px 20px 0 0;
+            padding: 30px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .modal-content {
+            background: #2d2d2d;
+        }
+
+        .modal-header {
+            font-size: 1.6em;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #1a1a1a;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .modal-header {
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            font-size: 0.95em;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .form-group label {
+            color: white;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+            color: #1a1a1a;
+        }
+
+        body.night-mode .form-group input,
+        body.night-mode .form-group textarea,
+        body.night-mode .form-group select {
+            background: #1a1a1a;
+            color: white;
+            border-color: #444;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #d4a574;
+            box-shadow: 0 0 8px rgba(212, 165, 116, 0.2);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-urls-section {
+            background: #fafafa;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .image-urls-section {
+            background: #1a1a1a;
+        }
+
+        .image-url-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .image-url-item input {
+            flex: 1;
+        }
+
+        .btn-remove-image {
+            padding: 8px 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+
+        .btn-add-image {
+            padding: 10px 16px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        /* ===== 非表示チェックボックス ===== */
+        .hidden-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        body.night-mode .hidden-checkbox {
+            background: #1a1a1a;
+        }
+
+        .hidden-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .hidden-checkbox label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        body.night-mode .hidden-checkbox label {
+            color: white;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 14px;
+            background: #d4a574;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+        }
+
+        .btn-submit:active {
+            background: #c89460;
+            transform: scale(0.98);
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 14px;
+            background: #f0f0f0;
+            color: #1a1a1a;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+        }
+
+        body.night-mode .btn-cancel {
+            background: #1a1a1a;
+            color: white;
+            border-color: #444;
+        }
+
+        .btn-cancel:active {
+            background: #e0e0e0;
+        }
+
+        .btn-delete {
+            flex: 1;
+            padding: 14px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+            margin-top: 10px;
+        }
+
+        .btn-delete:active {
+            background: #ff5252;
+            transform: scale(0.98);
+        }
+
+        /* ===== メニュー画像拡大表示モーダル ===== */
+        .menu-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-modal.active {
+            display: flex;
+        }
+
+        .menu-modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .menu-modal-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .menu-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            color: #1a1a1a;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .menu-modal-close:hover {
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .gallery { grid-template-columns: 1fr; }
+            .floating-buttons { bottom: 20px; right: 20px; }
+            .fab { width: 50px; height: 50px; font-size: 1.5em; }
+        }
+
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(12px, env(safe-area-inset-left));
+                padding-right: max(12px, env(safe-area-inset-right));
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GOhan NAVI</h1>
+            <p class="description">行きたいお店を、一つのリストで管理。毎日の営業状況も自動判定</p>
+            <p class="today-info">本日: <span id="todayDisplay"></span></p>
+        </header>
+
+        <div class="controls-section">
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="店名、地域、ジャンルで検索..."
+                >
+            </div>
+            <div class="filter-tags">
+                <button class="filter-btn active" data-filter="all">すべて</button>
+                <button class="filter-btn" data-filter="genre-japanese">和食</button>
+                <button class="filter-btn" data-filter="genre-italian">イタリアン</button>
+                <button class="filter-btn" data-filter="genre-ramen">ラーメン</button>
+                <button class="filter-btn" data-filter="genre-sushi">寿司</button>
+                <button class="filter-btn" data-filter="genre-french">フレンチ</button>
+                <button class="filter-btn" data-filter="genre-korean">韓国料理</button>
+            </div>
+        </div>
+
+        <div class="gallery" id="gallery"></div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-text">該当するお店が見つかりません</div>
+            <p>検索条件を変更するか、新規店舗を追加してください</p>
+        </div>
+    </div>
+
+    <!-- 浮遊ボタン -->
+    <div class="floating-buttons">
+        <button class="fab fab-add" id="addBtn" title="新規店舗を追加">+</button>
+    </div>
+
+    <!-- 新規追加/編集モーダル -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">新しいお店を追加</div>
+            <form id="restaurantForm">
+                <div class="form-group">
+                    <label>店名 *</label>
+                    <input type="text" id="formName" required>
+                </div>
+                <div class="form-group">
+                    <label>ジャンル *</label>
+                    <select id="formGenre" required>
+                        <option value="">選択してください</option>
+                        <option value="japanese">和食</option>
+                        <option value="italian">イタリアン</option>
+                        <option value="ramen">ラーメン</option>
+                        <option value="sushi">寿司</option>
+                        <option value="french">フレンチ</option>
+                        <option value="korean">韓国料理</option>
+                        <option value="other">その他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>住所 *</label>
+                    <input type="text" id="formAddress" required>
+                </div>
+                <div class="form-group">
+                    <label>緯度・経度（カンマ区切り）*</label>
+                    <input type="text" id="formCoords" placeholder="例: 35.6762,139.6503" required>
+                </div>
+                <div class="form-group">
+                    <label>最寄り駅</label>
+                    <input type="text" id="formStation" placeholder="例: 新宿駅">
+                </div>
+                <div class="form-group">
+                    <label>定休日（複数指定例：月,火）</label>
+                    <input type="text" id="formClosedDays" placeholder="例: 月曜日, 第1日曜日">
+                </div>
+                <div class="form-group">
+                    <label>予算帯 *</label>
+                    <select id="formBudget" required>
+                        <option value="">選択してください</option>
+                        <option value="¥">¥ (1,000円未満)</option>
+                        <option value="¥¥">¥¥ (1,000-3,000円)</option>
+                        <option value="¥¥¥">¥¥¥ (3,000円以上)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>営業時間</label>
+                    <input type="text" id="formHours" placeholder="例: 11:00-22:00">
+                </div>
+                <div class="form-group">
+                    <label>電話番号</label>
+                    <input type="tel" id="formPhone">
+                </div>
+                <div class="form-group">
+                    <label>メニュー写真 URL（複数可）</label>
+                    <p style="font-size: 0.85em; color: #999; margin-bottom: 10px;">
+                        💡 Google フォトの写真URLを貼り付けてください。複数枚追加可能です。
+                    </p>
+                    <div class="image-urls-section" id="imageUrlsSection">
+                        <div class="image-url-item">
+                            <input type="url" class="form-image-url" placeholder="https://photos.app.goo.gl/...">
+                            <button type="button" class="btn-remove-image" onclick="removeImageUrl(this)">削除</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add-image" onclick="addImageUrl()">+ 写真を追加</button>
+                </div>
+                <div class="form-group">
+                    <label>備考</label>
+                    <textarea id="formMemo" placeholder="このお店について...（複数行入力可）"></textarea>
+                </div>
+
+                <!-- 非表示チェックボックス -->
+                <div class="hidden-checkbox">
+                    <input type="checkbox" id="formHidden" style="width: 18px; height: 18px;">
+                    <label for="formHidden">非表示にする</label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">保存</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">キャンセル</button>
+                </div>
+                <button type="button" class="btn-delete" id="deleteBtn" style="display: none;" onclick="confirmDelete()">🗑️ 削除</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- メニュー画像拡大表示モーダル -->
+    <div class="menu-modal" id="menuModal">
+        <div class="menu-modal-content">
+            <button class="menu-modal-close" onclick="closeMenuModal()">✕</button>
+            <img id="menuModalImage" class="menu-modal-image" src="" alt="Menu">
+        </div>
+    </div>
+
+    <script>
+        // ===== LocalStorage 初期化 =====
+        const STORAGE_KEY = 'gohan-navigator-data';
+        
+        // LocalStorage にデータを保存
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(restaurants));
+        }
+
+        // LocalStorage からデータを復元
+        function loadFromStorage() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                try {
+                    restaurants = JSON.parse(data);
+                } catch (e) {
+                    console.error('Failed to load data from storage:', e);
+                    restaurants = getSampleData();
+                }
+            } else {
+                restaurants = getSampleData();
+            }
+        }
+
+        // サンプルデータ
+        function getSampleData() {
+            return [
+                {
+                    id: 1,
+                    name: 'Trattoria Bella',
+                    genre: 'italian',
+                    address: '渋谷区道玄坂1-2-3',
+                    coords: '35.6595,139.7004',
+                    station: '渋谷駅',
+                    closedDays: ['月'],
+                    budget: '¥¥',
+                    hours: '11:00-23:00',
+                    phone: '0312345678',
+                    memo: '本格的なイタリア料理。パスタが絶品。ワイン充実。',
+                    images: [
+                        'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=300&fit=crop',
+                        'https://images.unsplash.com/photo-1555939594-58d7cb561e1d?w=400&h=300&fit=crop'
+                    ],
+                    isHidden: false
+                },
+                {
+                    id: 2,
+                    name: '一寿司',
+                    genre: 'sushi',
+                    address: '中央区銀座4-5-6',
+                    coords: '35.6726,139.7614',
+                    station: '銀座駅',
+                    closedDays: [],
+                    budget: '¥¥¥',
+                    hours: '11:30-22:00',
+                    phone: '0323456789',
+                    memo: 'ミシュラン掲載。新鮮な魚。カウンター席のみ。',
+                    images: [
+                        'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&h=300&fit=crop'
+                    ],
+                    isHidden: false
+                },
+                {
+                    id: 3,
+                    name: 'ラーメン横丁',
+                    genre: 'ramen',
+                    address: '新宿区歌舞伎町7-8-9',
+                    coords: '35.6690,139.7380',
+                    station: '新宿駅',
+                    closedDays: [],
+                    budget: '¥',
+                    hours: '10:00-22:00',
+                    phone: '0334567890',
+                    memo: 'こってり豚骨スープ。細麺。昼混み注意。',
+                    images: [
+                        'https://images.unsplash.com/photo-1632709810780-1b6ce6a6f4be?w=400&h=300&fit=crop'
+                    ],
+                    isHidden: false
+                },
+                {
+                    id: 4,
+                    name: 'Maison Lumière',
+                    genre: 'french',
+                    address: '港区赤坂10-11-12',
+                    coords: '35.6673,139.7357',
+                    station: '赤坂見附駅',
+                    closedDays: ['日'],
+                    budget: '¥¥¥',
+                    hours: '12:00-14:00, 18:00-23:00',
+                    phone: '0345678901',
+                    memo: 'フレンチ懐石。季節の食材。個室あり。',
+                    images: [
+                        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'
+                    ],
+                    isHidden: false
+                },
+                {
+                    id: 5,
+                    name: 'チャングムの台所',
+                    genre: 'korean',
+                    address: '新宿区新大久保13-14-15',
+                    coords: '35.7008,139.7313',
+                    station: '新大久保駅',
+                    closedDays: [],
+                    budget: '¥¥',
+                    hours: '11:00-23:00',
+                    phone: '0356789012',
+                    memo: 'キムチが自家製。焼肉も充実。予約推奨。',
+                    images: [
+                        'https://images.unsplash.com/photo-1585152519444-b90c4f86ce8c?w=400&h=300&fit=crop'
+                    ],
+                    isHidden: false
+                }
+            ];
+        }
+
+        let restaurants = [];
+        let editingRestaurantId = null;
+
+        // ===== 時刻ベースのダークモード判定 =====
+        function checkTimeMode() {
+            const now = new Date();
+            const hours = now.getHours();
+            const isNight = hours >= 18 || hours < 6;
+            
+            if (isNight) {
+                document.body.classList.add('night-mode');
+            } else {
+                document.body.classList.remove('night-mode');
+            }
+        }
+
+        // ===== ジャンルラベル =====
+        function getGenreLabel(genre) {
+            const labels = {
+                japanese: '和食',
+                italian: 'イタリアン',
+                ramen: 'ラーメン',
+                sushi: '寿司',
+                french: 'フレンチ',
+                korean: '韓国料理',
+                other: 'その他'
+            };
+            return labels[genre] || genre;
+        }
+
+        // ===== 本日の曜日を表示 =====
+        function displayToday() {
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            const today = new Date();
+            const dayName = days[today.getDay()];
+            const dateStr = today.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('todayDisplay').textContent = `${dateStr}（${dayName}）`;
+            return dayName;
+        }
+
+        // ===== 本日が営業中かどうかを判定 =====
+        function isOpenToday(closedDays) {
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            const today = new Date();
+            const todayDayName = days[today.getDay()];
+            return !closedDays.includes(todayDayName);
+        }
+
+        // ===== AI 混雑度予測（簡易版） =====
+        function predictCongestion(genre, hour, dayOfWeek) {
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            
+            const patterns = {
+                'ramen': { 
+                    11: isWeekend ? 'very_high' : 'high',
+                    12: 'very_high',
+                    13: 'high',
+                    18: 'high',
+                    19: 'high'
+                },
+                'sushi': {
+                    12: 'medium',
+                    19: 'very_high',
+                    20: 'very_high'
+                },
+                'italian': {
+                    12: 'low',
+                    19: isWeekend ? 'very_high' : 'high',
+                    20: 'very_high'
+                },
+                'french': {
+                    12: 'low',
+                    19: 'very_high'
+                },
+                'korean': {
+                    18: 'high',
+                    19: 'very_high',
+                    20: 'very_high'
+                }
+            };
+
+            return patterns[genre]?.[hour] || 'low';
+        }
+
+        // ===== 混雑度を表示 =====
+        function getCongestionDisplay(congestion) {
+            const displays = {
+                'very_high': '😱 かなり混雑',
+                'high': '😊 混雑',
+                'medium': '👍 やや混雑',
+                'low': '😌 空いてる'
+            };
+            return displays[congestion] || 'ー';
+        }
+
+        // ===== カード作成 =====
+        function createRestaurantCard(restaurant) {
+            const isOpen = isOpenToday(restaurant.closedDays);
+            const isHidden = restaurant.isHidden || false;
+            const card = document.createElement('div');
+            card.className = 'restaurant-card';
+            if (!isOpen) {
+                card.classList.add('closed-today');
+            }
+            if (isHidden) {
+                card.classList.add('hidden');
+            }
+            card.dataset.id = restaurant.id;
+            card.dataset.genre = `genre-${restaurant.genre}`;
+            card.dataset.searchText = `${restaurant.name} ${restaurant.address} ${restaurant.genre} ${restaurant.station}`.toLowerCase();
+
+            const imagesHTML = restaurant.images.map((img, idx) => `
+                <img src="${img}" alt="Menu" class="carousel-image" style="display: ${idx === 0 ? 'block' : 'none'};" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22><rect fill=%22%23D4A574%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22Arial%22>🍽️</text></svg>'">
+            `).join('');
+
+            const dotsHTML = restaurant.images.map((_, idx) => `
+                <button class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="switchImage(${restaurant.id}, ${idx})"></button>
+            `).join('');
+
+            const jordanLink = `https://www.jorudan.co.jp/norikae/`;
+            const telLink = `tel:${restaurant.phone}`;
+            
+            let badgeHTML = '';
+            if (!isOpen) {
+                badgeHTML = '<div class="closed-badge">本日定休</div>';
+            } else if (isHidden) {
+                badgeHTML = '<div class="hidden-badge">非表示</div>';
+            }
+
+            // AI 混雑度予測
+            const now = new Date();
+            const congestion = predictCongestion(restaurant.genre, now.getHours(), now.getDay());
+            const congestionDisplay = getCongestionDisplay(congestion);
+
+            card.innerHTML = `
+                ${badgeHTML}
+                <button class="edit-btn" onclick="editRestaurant(${restaurant.id})">編集</button>
+                <div class="image-carousel">
+                    <div class="carousel-images" id="carousel-${restaurant.id}">
+                        ${imagesHTML}
+                    </div>
+                    <div class="carousel-nav">
+                        ${dotsHTML}
+                    </div>
+                    ${restaurant.images.length > 1 ? `
+                        <button class="carousel-prev" onclick="prevImage(${restaurant.id})">❮</button>
+                        <button class="carousel-next" onclick="nextImage(${restaurant.id})">❯</button>
+                    ` : ''}
+                </div>
+                <div class="card-content">
+                    <div class="restaurant-name">${restaurant.name}</div>
+                    <span class="genre-badge">${getGenreLabel(restaurant.genre)}</span>
+                    <div class="card-info">
+                        <div class="info-row">
+                            <span class="info-icon">📍</span>
+                            <div>${restaurant.address}</div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">🚃</span>
+                            <div>
+                                <a href="${jordanLink}" class="tap-link" target="_blank">${restaurant.station}</a>
+                                をタップで乗換案内
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">💰</span>
+                            <span class="budget-indicator">${restaurant.budget}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">⏰</span>
+                            <div>${restaurant.hours}</div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">📱</span>
+                            <div>
+                                <a href="${telLink}" class="phone-link">${restaurant.phone}</a>
+                                をタップして電話
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">🚗</span>
+                            <div>混雑度: ${congestionDisplay}</div>
+                        </div>
+                    </div>
+
+                    <div class="map-container">
+                        🗺️ Googleマップ埋め込み表示エリア
+                    </div>
+
+                    ${restaurant.images.length > 0 ? `
+                        <div class="menu-section">
+                            <div class="menu-title">📋 メニュー</div>
+                            <div class="menu-images">
+                                ${restaurant.images.map((img, idx) => `
+                                    <img src="${img}" class="menu-thumbnail" alt="Menu ${idx+1}" onclick="openMenuModal('${img}')" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23D4A574%22 width=%22100%22 height=%22100%22/></svg>'">
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${restaurant.memo ? `<div class="memo-section">💭 ${restaurant.memo}</div>` : ''}
+                </div>
+            `;
+
+            return card;
+        }
+
+        // ===== 画像カルーセル制御 =====
+        window.switchImage = function(id, index) {
+            const carousel = document.getElementById(`carousel-${id}`);
+            const images = carousel.querySelectorAll('.carousel-image');
+            const card = document.querySelector(`[data-id="${id}"]`);
+            const dots = card.querySelectorAll('.carousel-dot');
+            
+            images.forEach(img => img.style.display = 'none');
+            images[index].style.display = 'block';
+            
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[index].classList.add('active');
+        };
+
+        window.nextImage = function(id) {
+            const card = document.querySelector(`[data-id="${id}"]`);
+            const carousel = card.querySelector('.carousel-images');
+            const images = carousel.querySelectorAll('.carousel-image');
+            let currentIndex = Array.from(images).findIndex(img => img.style.display !== 'none');
+            const nextIndex = (currentIndex + 1) % images.length;
+            window.switchImage(id, nextIndex);
+        };
+
+        window.prevImage = function(id) {
+            const card = document.querySelector(`[data-id="${id}"]`);
+            const carousel = card.querySelector('.carousel-images');
+            const images = carousel.querySelectorAll('.carousel-image');
+            let currentIndex = Array.from(images).findIndex(img => img.style.display !== 'none');
+            const prevIndex = (currentIndex - 1 + images.length) % images.length;
+            window.switchImage(id, prevIndex);
+        };
+
+        // ===== メニュー画像拡大表示 =====
+        window.openMenuModal = function(imageSrc) {
+            const modal = document.getElementById('menuModal');
+            document.getElementById('menuModalImage').src = imageSrc;
+            modal.classList.add('active');
+        };
+
+        window.closeMenuModal = function() {
+            document.getElementById('menuModal').classList.remove('active');
+        };
+
+        // ===== ギャラリー更新 =====
+        function updateGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            restaurants.forEach(restaurant => {
+                const card = createRestaurantCard(restaurant);
+                gallery.appendChild(card);
+            });
+            applyFilters();
+        }
+
+        // ===== 検索機能 =====
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchText = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.restaurant-card');
+            cards.forEach(card => {
+                const text = card.dataset.searchText;
+                if (text.includes(searchText)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            renderRestaurants();
+        });
+
+        // ===== フィルター機能 =====
+        let activeFilter = 'all';
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                activeFilter = this.dataset.filter;
+                applyFilters();
+            });
+        });
+
+        function applyFilters() {
+            const cards = document.querySelectorAll('.restaurant-card');
+            cards.forEach(card => {
+                const cardGenre = card.dataset.genre;
+                
+                if (activeFilter === 'all') {
+                    // 「すべて」を押したら、非表示中の店舗含め全部表示
+                    card.style.display = '';
+                } else {
+                    // ジャンルフィルターを押したら、該当店舗のみ表示
+                    if (cardGenre === activeFilter) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+            renderRestaurants();
+        }
+
+        function renderRestaurants() {
+            const gallery = document.getElementById('gallery');
+            const emptyState = document.getElementById('emptyState');
+            const visibleCards = gallery.querySelectorAll('.restaurant-card');
+            let displayCount = 0;
+            visibleCards.forEach(card => {
+                if (card.style.display !== 'none') {
+                    displayCount++;
+                }
+            });
+            emptyState.style.display = displayCount === 0 ? 'block' : 'none';
+        }
+
+        // ===== モーダル制御 =====
+        document.getElementById('addBtn').addEventListener('click', () => {
+            editingRestaurantId = null;
+            document.getElementById('modalTitle').textContent = '新しいお店を追加';
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('restaurantForm').reset();
+            document.getElementById('imageUrlsSection').innerHTML = `
+                <div class="image-url-item">
+                    <input type="url" class="form-image-url" placeholder="https://photos.app.goo.gl/...">
+                    <button type="button" class="btn-remove-image" onclick="removeImageUrl(this)">削除</button>
+                </div>
+            `;
+            document.getElementById('addModal').classList.add('active');
+        });
+
+        window.editRestaurant = function(id) {
+            const restaurant = restaurants.find(r => r.id === id);
+            if (!restaurant) return;
+
+            editingRestaurantId = id;
+            document.getElementById('modalTitle').textContent = `${restaurant.name} を編集`;
+            document.getElementById('deleteBtn').style.display = 'block';
+            
+            document.getElementById('formName').value = restaurant.name;
+            document.getElementById('formGenre').value = restaurant.genre;
+            document.getElementById('formAddress').value = restaurant.address;
+            document.getElementById('formCoords').value = restaurant.coords;
+            document.getElementById('formStation').value = restaurant.station;
+            document.getElementById('formClosedDays').value = restaurant.closedDays.join(', ');
+            document.getElementById('formBudget').value = restaurant.budget;
+            document.getElementById('formHours').value = restaurant.hours;
+            document.getElementById('formPhone').value = restaurant.phone;
+            document.getElementById('formMemo').value = restaurant.memo;
+            document.getElementById('formHidden').checked = restaurant.isHidden || false;
+
+            const section = document.getElementById('imageUrlsSection');
+            section.innerHTML = '';
+            restaurant.images.forEach(url => {
+                const item = document.createElement('div');
+                item.className = 'image-url-item';
+                item.innerHTML = `
+                    <input type="url" class="form-image-url" value="${url}">
+                    <button type="button" class="btn-remove-image" onclick="removeImageUrl(this)">削除</button>
+                `;
+                section.appendChild(item);
+            });
+
+            document.getElementById('addModal').classList.add('active');
+        };
+
+        function closeModal() {
+            document.getElementById('addModal').classList.remove('active');
+            editingRestaurantId = null;
+        }
+
+        window.addImageUrl = function() {
+            const section = document.getElementById('imageUrlsSection');
+            const newItem = document.createElement('div');
+            newItem.className = 'image-url-item';
+            newItem.innerHTML = `
+                <input type="url" class="form-image-url" placeholder="https://photos.app.goo.gl/...">
+                <button type="button" class="btn-remove-image" onclick="removeImageUrl(this)">削除</button>
+            `;
+            section.appendChild(newItem);
+        };
+
+        window.removeImageUrl = function(btn) {
+            btn.parentElement.remove();
+        };
+
+        window.confirmDelete = function() {
+            if (confirm('本当に削除しますか？この操作は取り消せません。')) {
+                deleteRestaurant(editingRestaurantId);
+            }
+        };
+
+        function deleteRestaurant(id) {
+            restaurants = restaurants.filter(r => r.id !== id);
+            saveToStorage();
+            updateGallery();
+            closeModal();
+        }
+
+        document.getElementById('restaurantForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const imageUrls = Array.from(document.querySelectorAll('.form-image-url'))
+                .map(input => input.value)
+                .filter(url => url.trim() !== '');
+
+            const closedDaysStr = document.getElementById('formClosedDays').value;
+            const closedDays = closedDaysStr ? closedDaysStr.split(',').map(d => {
+                const day = d.trim();
+                if (day.includes('月')) return '月';
+                if (day.includes('火')) return '火';
+                if (day.includes('水')) return '水';
+                if (day.includes('木')) return '木';
+                if (day.includes('金')) return '金';
+                if (day.includes('土')) return '土';
+                if (day.includes('日')) return '日';
+                return day;
+            }).filter(d => d.length === 1) : [];
+
+            const isHidden = document.getElementById('formHidden').checked;
+
+            if (editingRestaurantId) {
+                // 編集
+                const restaurant = restaurants.find(r => r.id === editingRestaurantId);
+                if (restaurant) {
+                    restaurant.name = document.getElementById('formName').value;
+                    restaurant.genre = document.getElementById('formGenre').value;
+                    restaurant.address = document.getElementById('formAddress').value;
+                    restaurant.coords = document.getElementById('formCoords').value;
+                    restaurant.station = document.getElementById('formStation').value;
+                    restaurant.closedDays = closedDays;
+                    restaurant.budget = document.getElementById('formBudget').value;
+                    restaurant.hours = document.getElementById('formHours').value;
+                    restaurant.phone = document.getElementById('formPhone').value;
+                    restaurant.memo = document.getElementById('formMemo').value;
+                    restaurant.images = imageUrls.length > 0 ? imageUrls : ['data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="%23D4A574" width="400" height="300"/><text x="200" y="150" font-size="60" text-anchor="middle" fill="white" font-family="Arial">🍽️</text></svg>'];
+                    restaurant.isHidden = isHidden;
+                }
+            } else {
+                // 新規追加
+                const newRestaurant = {
+                    id: Math.max(...restaurants.map(r => r.id), 0) + 1,
+                    name: document.getElementById('formName').value,
+                    genre: document.getElementById('formGenre').value,
+                    address: document.getElementById('formAddress').value,
+                    coords: document.getElementById('formCoords').value,
+                    station: document.getElementById('formStation').value,
+                    closedDays: closedDays,
+                    budget: document.getElementById('formBudget').value,
+                    hours: document.getElementById('formHours').value,
+                    phone: document.getElementById('formPhone').value,
+                    memo: document.getElementById('formMemo').value,
+                    images: imageUrls.length > 0 ? imageUrls : ['data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect fill="%23D4A574" width="400" height="300"/><text x="200" y="150" font-size="60" text-anchor="middle" fill="white" font-family="Arial">🍽️</text></svg>'],
+                    isHidden: isHidden
+                };
+                restaurants.push(newRestaurant);
+            }
+
+            saveToStorage();
+            updateGallery();
+            closeModal();
+        });
+
+        // ===== 初期化 =====
+        checkTimeMode();
+        setInterval(checkTimeMode, 60000);
+        displayToday();
+        loadFromStorage();
+        updateGallery();
+    </script>
+</body>
+</html>
