@@ -58,10 +58,6 @@
             background-clip: text;
         }
 
-        .subtitle {
-            display: none;
-        }
-
         .description {
             color: #666;
             font-size: 0.85em;
@@ -103,7 +99,7 @@
         .search-bar {
             display: flex;
             gap: 12px;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         .search-input {
@@ -129,6 +125,35 @@
             outline: none;
             border-color: #d4a574;
             box-shadow: 0 0 8px rgba(212, 165, 116, 0.2);
+        }
+
+        /* ===== フィルターセクション ===== */
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section-title {
+            font-size: 0.95em;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .filter-section-title {
+            color: white;
+        }
+
+        .filter-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 18px 0;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .filter-divider {
+            background: #444;
         }
 
         .filter-tags {
@@ -385,6 +410,22 @@
             margin-top: 2px;
         }
 
+        .address-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        body.night-mode .address-link {
+            color: #66b3ff;
+        }
+
+        .address-link:active {
+            opacity: 0.7;
+        }
+
         .budget-indicator {
             font-weight: 700;
             color: #d4a574;
@@ -413,25 +454,6 @@
 
         body.night-mode .phone-link {
             color: #66b3ff;
-        }
-
-        .map-container {
-            margin: 16px 0;
-            border-radius: 8px;
-            overflow: hidden;
-            height: 250px;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 0.9em;
-            transition: all 0.5s ease;
-        }
-
-        body.night-mode .map-container {
-            background: #444;
-            color: #888;
         }
 
         /* ===== メニュー表示 ===== */
@@ -480,7 +502,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
-        /* ===== 備考（スクロール対応） ===== */
+        /* ===== 備考 ===== */
         .memo-section {
             background: #fafafa;
             padding: 12px;
@@ -648,6 +670,38 @@
         .form-group textarea {
             resize: vertical;
             min-height: 100px;
+        }
+
+        .form-helper-text {
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .genre-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .genre-input-group select {
+            flex: 1;
+        }
+
+        .genre-input-group span {
+            padding-top: 10px;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .genre-custom-input {
+            width: 100%;
+        }
+
+        .suggested-genres {
+            font-size: 0.85em;
+            color: #d4a574;
+            margin-top: 8px;
         }
 
         .image-urls-section {
@@ -888,14 +942,30 @@
                     placeholder="店名、地域、ジャンルで検索..."
                 >
             </div>
-            <div class="filter-tags">
-                <button class="filter-btn active" data-filter="all">すべて</button>
-                <button class="filter-btn" data-filter="genre-japanese">和食</button>
-                <button class="filter-btn" data-filter="genre-italian">イタリアン</button>
-                <button class="filter-btn" data-filter="genre-ramen">ラーメン</button>
-                <button class="filter-btn" data-filter="genre-sushi">寿司</button>
-                <button class="filter-btn" data-filter="genre-french">フレンチ</button>
-                <button class="filter-btn" data-filter="genre-korean">韓国料理</button>
+
+            <!-- 料理ジャンルセクション -->
+            <div class="filter-section">
+                <div class="filter-section-title">🍽️ 料理ジャンルから探す</div>
+                <div class="filter-tags" id="genreFilters">
+                    <button class="filter-btn active" data-filter="all">すべて</button>
+                    <button class="filter-btn" data-filter="genre-japanese">和食</button>
+                    <button class="filter-btn" data-filter="genre-italian">イタリアン</button>
+                    <button class="filter-btn" data-filter="genre-ramen">ラーメン</button>
+                    <button class="filter-btn" data-filter="genre-sushi">寿司</button>
+                    <button class="filter-btn" data-filter="genre-french">フレンチ</button>
+                    <button class="filter-btn" data-filter="genre-korean">韓国料理</button>
+                </div>
+            </div>
+
+            <!-- 仕切り線 -->
+            <div class="filter-divider"></div>
+
+            <!-- 地域セクション -->
+            <div class="filter-section">
+                <div class="filter-section-title">📍 地域から探す</div>
+                <div class="filter-tags" id="districtFilters">
+                    <button class="filter-btn active" data-filter="all">すべての地域</button>
+                </div>
             </div>
         </div>
 
@@ -922,35 +992,47 @@
                     <label>店名 *</label>
                     <input type="text" id="formName" required>
                 </div>
+
                 <div class="form-group">
                     <label>ジャンル *</label>
-                    <select id="formGenre" required>
-                        <option value="">選択してください</option>
-                        <option value="japanese">和食</option>
-                        <option value="italian">イタリアン</option>
-                        <option value="ramen">ラーメン</option>
-                        <option value="sushi">寿司</option>
-                        <option value="french">フレンチ</option>
-                        <option value="korean">韓国料理</option>
-                        <option value="other">その他</option>
-                    </select>
+                    <p class="form-helper-text">既存ジャンルから選択するか、新しく入力できます</p>
+                    <div class="genre-input-group">
+                        <select id="formGenreSelect">
+                            <option value="">既存ジャンルから選択...</option>
+                            <option value="japanese">和食</option>
+                            <option value="italian">イタリアン</option>
+                            <option value="ramen">ラーメン</option>
+                            <option value="sushi">寿司</option>
+                            <option value="french">フレンチ</option>
+                            <option value="korean">韓国料理</option>
+                            <option value="other">その他</option>
+                        </select>
+                        <span>または</span>
+                    </div>
+                    <input type="text" id="formGenreCustom" class="genre-custom-input" placeholder="例：オムライス、たこ焼き、パスタ">
+                    <p class="suggested-genres" id="suggestedGenres"></p>
                 </div>
+
                 <div class="form-group">
                     <label>住所 *</label>
                     <input type="text" id="formAddress" required>
                 </div>
+
                 <div class="form-group">
-                    <label>緯度・経度（カンマ区切り）*</label>
-                    <input type="text" id="formCoords" placeholder="例: 35.6762,139.6503" required>
+                    <label>地域 *</label>
+                    <input type="text" id="formDistrict" placeholder="例：渋谷、銀座、新宿" required>
                 </div>
+
                 <div class="form-group">
                     <label>最寄り駅</label>
-                    <input type="text" id="formStation" placeholder="例: 新宿駅">
+                    <input type="text" id="formStation" placeholder="例：新宿駅">
                 </div>
+
                 <div class="form-group">
                     <label>定休日（複数指定例：月,火）</label>
-                    <input type="text" id="formClosedDays" placeholder="例: 月曜日, 第1日曜日">
+                    <input type="text" id="formClosedDays" placeholder="例：月曜日, 第1日曜日">
                 </div>
+
                 <div class="form-group">
                     <label>予算帯 *</label>
                     <select id="formBudget" required>
@@ -960,19 +1042,20 @@
                         <option value="¥¥¥">¥¥¥ (3,000円以上)</option>
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label>営業時間</label>
                     <input type="text" id="formHours" placeholder="例: 11:00-22:00">
                 </div>
+
                 <div class="form-group">
                     <label>電話番号</label>
                     <input type="tel" id="formPhone">
                 </div>
+
                 <div class="form-group">
                     <label>メニュー写真 URL（複数可）</label>
-                    <p style="font-size: 0.85em; color: #999; margin-bottom: 10px;">
-                        💡 Google フォトの写真URLを貼り付けてください。複数枚追加可能です。
-                    </p>
+                    <p class="form-helper-text">💡 Google フォトの写真URLを貼り付けてください。複数枚追加可能です。</p>
                     <div class="image-urls-section" id="imageUrlsSection">
                         <div class="image-url-item">
                             <input type="url" class="form-image-url" placeholder="https://photos.app.goo.gl/...">
@@ -981,6 +1064,7 @@
                     </div>
                     <button type="button" class="btn-add-image" onclick="addImageUrl()">+ 写真を追加</button>
                 </div>
+
                 <div class="form-group">
                     <label>備考</label>
                     <textarea id="formMemo" placeholder="このお店について...（複数行入力可）"></textarea>
@@ -1013,12 +1097,10 @@
         // ===== LocalStorage 初期化 =====
         const STORAGE_KEY = 'gohan-navigator-data';
         
-        // LocalStorage にデータを保存
         function saveToStorage() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(restaurants));
         }
 
-        // LocalStorage からデータを復元
         function loadFromStorage() {
             const data = localStorage.getItem(STORAGE_KEY);
             if (data) {
@@ -1033,15 +1115,14 @@
             }
         }
 
-        // サンプルデータ
         function getSampleData() {
             return [
                 {
                     id: 1,
                     name: 'Trattoria Bella',
-                    genre: 'italian',
+                    genre: 'イタリアン',
                     address: '渋谷区道玄坂1-2-3',
-                    coords: '35.6595,139.7004',
+                    district: '渋谷',
                     station: '渋谷駅',
                     closedDays: ['月'],
                     budget: '¥¥',
@@ -1057,9 +1138,9 @@
                 {
                     id: 2,
                     name: '一寿司',
-                    genre: 'sushi',
+                    genre: '寿司',
                     address: '中央区銀座4-5-6',
-                    coords: '35.6726,139.7614',
+                    district: '銀座',
                     station: '銀座駅',
                     closedDays: [],
                     budget: '¥¥¥',
@@ -1074,9 +1155,9 @@
                 {
                     id: 3,
                     name: 'ラーメン横丁',
-                    genre: 'ramen',
+                    genre: 'ラーメン',
                     address: '新宿区歌舞伎町7-8-9',
-                    coords: '35.6690,139.7380',
+                    district: '新宿',
                     station: '新宿駅',
                     closedDays: [],
                     budget: '¥',
@@ -1091,9 +1172,9 @@
                 {
                     id: 4,
                     name: 'Maison Lumière',
-                    genre: 'french',
+                    genre: 'フレンチ',
                     address: '港区赤坂10-11-12',
-                    coords: '35.6673,139.7357',
+                    district: '赤坂',
                     station: '赤坂見附駅',
                     closedDays: ['日'],
                     budget: '¥¥¥',
@@ -1108,9 +1189,9 @@
                 {
                     id: 5,
                     name: 'チャングムの台所',
-                    genre: 'korean',
+                    genre: '韓国料理',
                     address: '新宿区新大久保13-14-15',
-                    coords: '35.7008,139.7313',
+                    district: '新大久保',
                     station: '新大久保駅',
                     closedDays: [],
                     budget: '¥¥',
@@ -1127,6 +1208,8 @@
 
         let restaurants = [];
         let editingRestaurantId = null;
+        let activeGenreFilter = 'all';
+        let activeDistrictFilter = null;
 
         // ===== 時刻ベースのダークモード判定 =====
         function checkTimeMode() {
@@ -1173,33 +1256,33 @@
             return !closedDays.includes(todayDayName);
         }
 
-        // ===== AI 混雑度予測（簡易版） =====
+        // ===== AI 混雑度予測 =====
         function predictCongestion(genre, hour, dayOfWeek) {
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
             
             const patterns = {
-                'ramen': { 
+                'ラーメン': { 
                     11: isWeekend ? 'very_high' : 'high',
                     12: 'very_high',
                     13: 'high',
                     18: 'high',
                     19: 'high'
                 },
-                'sushi': {
+                '寿司': {
                     12: 'medium',
                     19: 'very_high',
                     20: 'very_high'
                 },
-                'italian': {
+                'イタリアン': {
                     12: 'low',
                     19: isWeekend ? 'very_high' : 'high',
                     20: 'very_high'
                 },
-                'french': {
+                'フレンチ': {
                     12: 'low',
                     19: 'very_high'
                 },
-                'korean': {
+                '韓国料理': {
                     18: 'high',
                     19: 'very_high',
                     20: 'very_high'
@@ -1209,7 +1292,6 @@
             return patterns[genre]?.[hour] || 'low';
         }
 
-        // ===== 混雑度を表示 =====
         function getCongestionDisplay(congestion) {
             const displays = {
                 'very_high': '😱 かなり混雑',
@@ -1233,8 +1315,9 @@
                 card.classList.add('hidden');
             }
             card.dataset.id = restaurant.id;
-            card.dataset.genre = `genre-${restaurant.genre}`;
-            card.dataset.searchText = `${restaurant.name} ${restaurant.address} ${restaurant.genre} ${restaurant.station}`.toLowerCase();
+            card.dataset.genre = restaurant.genre;
+            card.dataset.district = restaurant.district;
+            card.dataset.searchText = `${restaurant.name} ${restaurant.address} ${restaurant.genre} ${restaurant.station} ${restaurant.district}`.toLowerCase();
 
             const imagesHTML = restaurant.images.map((img, idx) => `
                 <img src="${img}" alt="Menu" class="carousel-image" style="display: ${idx === 0 ? 'block' : 'none'};" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22><rect fill=%22%23D4A574%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22Arial%22>🍽️</text></svg>'">
@@ -1244,7 +1327,7 @@
                 <button class="carousel-dot ${idx === 0 ? 'active' : ''}" onclick="switchImage(${restaurant.id}, ${idx})"></button>
             `).join('');
 
-            const jordanLink = `https://www.jorudan.co.jp/norikae/`;
+            const mapsLink = `maps://maps.apple.com/?address=${encodeURIComponent(restaurant.address)}&dirflg=d`;
             const telLink = `tel:${restaurant.phone}`;
             
             let badgeHTML = '';
@@ -1254,7 +1337,6 @@
                 badgeHTML = '<div class="hidden-badge">非表示</div>';
             }
 
-            // AI 混雑度予測
             const now = new Date();
             const congestion = predictCongestion(restaurant.genre, now.getHours(), now.getDay());
             const congestionDisplay = getCongestionDisplay(congestion);
@@ -1276,18 +1358,15 @@
                 </div>
                 <div class="card-content">
                     <div class="restaurant-name">${restaurant.name}</div>
-                    <span class="genre-badge">${getGenreLabel(restaurant.genre)}</span>
+                    <span class="genre-badge">${restaurant.genre}</span>
                     <div class="card-info">
                         <div class="info-row">
                             <span class="info-icon">📍</span>
-                            <div>${restaurant.address}</div>
+                            <a href="${mapsLink}" class="address-link">${restaurant.address}</a>
                         </div>
                         <div class="info-row">
                             <span class="info-icon">🚃</span>
-                            <div>
-                                <a href="${jordanLink}" class="tap-link" target="_blank">${restaurant.station}</a>
-                                をタップで乗換案内
-                            </div>
+                            <div>${restaurant.station}</div>
                         </div>
                         <div class="info-row">
                             <span class="info-icon">💰</span>
@@ -1308,10 +1387,6 @@
                             <span class="info-icon">🚗</span>
                             <div>混雑度: ${congestionDisplay}</div>
                         </div>
-                    </div>
-
-                    <div class="map-container">
-                        🗺️ Googleマップ埋め込み表示エリア
                     </div>
 
                     ${restaurant.images.length > 0 ? `
@@ -1375,6 +1450,67 @@
             document.getElementById('menuModal').classList.remove('active');
         };
 
+        // ===== 過去のジャンル一覧を表示 =====
+        function loadSuggestedGenres() {
+            const genres = new Set();
+            restaurants.forEach(r => {
+                if (r.genre) genres.add(r.genre);
+            });
+            
+            const suggestedContainer = document.getElementById('suggestedGenres');
+            if (genres.size > 0) {
+                const uniqueGenres = Array.from(genres).filter(g => !['japanese', 'italian', 'ramen', 'sushi', 'french', 'korean', 'other'].includes(g));
+                if (uniqueGenres.length > 0) {
+                    suggestedContainer.innerHTML = `💡 過去に登録されたジャンル：${uniqueGenres.join(', ')}`;
+                }
+            }
+        }
+
+        // ===== ジャンル選択時の処理 =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const genreSelect = document.getElementById('formGenreSelect');
+            if (genreSelect) {
+                genreSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        document.getElementById('formGenreCustom').value = this.value;
+                    }
+                });
+            }
+        });
+
+        // ===== ジャンル取得 =====
+        function getGenreValue() {
+            const customGenre = document.getElementById('formGenreCustom').value.trim();
+            return customGenre || '未分類';
+        }
+
+        // ===== 地域フィルターを動的生成 =====
+        function generateDistrictFilters() {
+            const districts = new Set();
+            restaurants.forEach(r => {
+                if (r.district) districts.add(r.district);
+            });
+            
+            const filterContainer = document.getElementById('districtFilters');
+            const existingButtons = filterContainer.querySelectorAll('button[data-filter!="all"]');
+            existingButtons.forEach(btn => btn.remove());
+            
+            Array.from(districts).sort().forEach(district => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.dataset.filter = `district-${district}`;
+                btn.textContent = district;
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('#districtFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    activeDistrictFilter = district === 'すべての地域' ? null : district;
+                    applyAllFilters();
+                });
+                filterContainer.appendChild(btn);
+            });
+        }
+
         // ===== ギャラリー更新 =====
         function updateGallery() {
             const gallery = document.getElementById('gallery');
@@ -1383,51 +1519,54 @@
                 const card = createRestaurantCard(restaurant);
                 gallery.appendChild(card);
             });
-            applyFilters();
+            generateDistrictFilters();
+            loadSuggestedGenres();
+            applyAllFilters();
         }
 
         // ===== 検索機能 =====
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchText = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.restaurant-card');
-            cards.forEach(card => {
-                const text = card.dataset.searchText;
-                if (text.includes(searchText)) {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            renderRestaurants();
+            applyAllFilters(searchText);
         });
 
-        // ===== フィルター機能 =====
-        let activeFilter = 'all';
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                activeFilter = this.dataset.filter;
-                applyFilters();
+        // ===== ジャンルフィルター =====
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('#genreFilters .filter-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('#genreFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    activeGenreFilter = this.dataset.filter;
+                    applyAllFilters();
+                });
             });
         });
 
-        function applyFilters() {
+        // ===== すべてのフィルターを適用 =====
+        function applyAllFilters(searchText = '') {
             const cards = document.querySelectorAll('.restaurant-card');
             cards.forEach(card => {
-                const cardGenre = card.dataset.genre;
+                const restaurant = restaurants.find(r => r.id == card.dataset.id);
                 
-                if (activeFilter === 'all') {
-                    // 「すべて」を押したら、非表示中の店舗含め全部表示
-                    card.style.display = '';
-                } else {
-                    // ジャンルフィルターを押したら、該当店舗のみ表示
-                    if (cardGenre === activeFilter) {
-                        card.style.display = '';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                let show = true;
+
+                // 検索フィルター
+                if (searchText && !card.dataset.searchText.includes(searchText)) {
+                    show = false;
                 }
+
+                // ジャンルフィルター
+                if (show && activeGenreFilter !== 'all') {
+                    show = card.dataset.genre === activeGenreFilter;
+                }
+
+                // 地域フィルター
+                if (show && activeDistrictFilter) {
+                    show = card.dataset.district === activeDistrictFilter;
+                }
+
+                card.style.display = show ? '' : 'none';
             });
             renderRestaurants();
         }
@@ -1457,6 +1596,7 @@
                     <button type="button" class="btn-remove-image" onclick="removeImageUrl(this)">削除</button>
                 </div>
             `;
+            loadSuggestedGenres();
             document.getElementById('addModal').classList.add('active');
         });
 
@@ -1469,9 +1609,8 @@
             document.getElementById('deleteBtn').style.display = 'block';
             
             document.getElementById('formName').value = restaurant.name;
-            document.getElementById('formGenre').value = restaurant.genre;
             document.getElementById('formAddress').value = restaurant.address;
-            document.getElementById('formCoords').value = restaurant.coords;
+            document.getElementById('formDistrict').value = restaurant.district;
             document.getElementById('formStation').value = restaurant.station;
             document.getElementById('formClosedDays').value = restaurant.closedDays.join(', ');
             document.getElementById('formBudget').value = restaurant.budget;
@@ -1479,6 +1618,14 @@
             document.getElementById('formPhone').value = restaurant.phone;
             document.getElementById('formMemo').value = restaurant.memo;
             document.getElementById('formHidden').checked = restaurant.isHidden || false;
+
+            // ジャンル設定
+            const select = document.getElementById('formGenreSelect');
+            if (Array.from(select.options).map(o => o.value).includes(restaurant.genre)) {
+                select.value = restaurant.genre;
+            } else {
+                document.getElementById('formGenreCustom').value = restaurant.genre;
+            }
 
             const section = document.getElementById('imageUrlsSection');
             section.innerHTML = '';
@@ -1549,15 +1696,15 @@
             }).filter(d => d.length === 1) : [];
 
             const isHidden = document.getElementById('formHidden').checked;
+            const genre = getGenreValue();
 
             if (editingRestaurantId) {
-                // 編集
                 const restaurant = restaurants.find(r => r.id === editingRestaurantId);
                 if (restaurant) {
                     restaurant.name = document.getElementById('formName').value;
-                    restaurant.genre = document.getElementById('formGenre').value;
+                    restaurant.genre = genre;
                     restaurant.address = document.getElementById('formAddress').value;
-                    restaurant.coords = document.getElementById('formCoords').value;
+                    restaurant.district = document.getElementById('formDistrict').value;
                     restaurant.station = document.getElementById('formStation').value;
                     restaurant.closedDays = closedDays;
                     restaurant.budget = document.getElementById('formBudget').value;
@@ -1568,13 +1715,12 @@
                     restaurant.isHidden = isHidden;
                 }
             } else {
-                // 新規追加
                 const newRestaurant = {
                     id: Math.max(...restaurants.map(r => r.id), 0) + 1,
                     name: document.getElementById('formName').value,
-                    genre: document.getElementById('formGenre').value,
+                    genre: genre,
                     address: document.getElementById('formAddress').value,
-                    coords: document.getElementById('formCoords').value,
+                    district: document.getElementById('formDistrict').value,
                     station: document.getElementById('formStation').value,
                     closedDays: closedDays,
                     budget: document.getElementById('formBudget').value,
