@@ -81,6 +81,64 @@
             color: #888;
         }
 
+        /* ===== リスト切り替えタブ ===== */
+        .list-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            padding: 0 0 12px 0;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+            transition: all 0.5s ease;
+        }
+
+        body.night-mode .list-tabs {
+            border-bottom-color: #444;
+        }
+
+        .list-tab {
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: #999;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -12px;
+        }
+
+        body.night-mode .list-tab {
+            color: #888;
+        }
+
+        .list-tab:hover {
+            color: #d4a574;
+        }
+
+        .list-tab.active {
+            color: #d4a574;
+            border-bottom-color: #d4a574;
+        }
+
+        .list-tab-add {
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
+            color: #d4a574;
+            font-weight: 700;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .list-tab-add:hover {
+            transform: scale(1.1);
+        }
+
         /* ===== 検索・フィルターエリア ===== */
         .controls-section {
             background: white;
@@ -929,9 +987,17 @@
     <div class="container">
         <header>
             <h1>GOhan NAVI</h1>
-            <p class="description">行きたいお店を、一つのリストで管理。毎日の営業状況も自動判定</p>
+            <p class="description">お店の営業状況を自動判定。毎日のリスト管理をシンプルに</p>
             <p class="today-info">本日: <span id="todayDisplay"></span></p>
         </header>
+
+        <!-- リスト切り替えタブ -->
+        <div class="list-tabs">
+            <button class="list-tab active" data-list="restaurants">🍽️ 飲食店</button>
+            <button class="list-tab" data-list="hotels">🏨 宿泊施設</button>
+            <button class="list-tab" data-list="spots">✈️ 旅行スポット</button>
+            <button class="list-tab-add" onclick="addNewList()">+</button>
+        </div>
 
         <div class="controls-section">
             <div class="search-bar">
@@ -1210,6 +1276,7 @@
         let editingRestaurantId = null;
         let activeGenreFilter = 'all';
         let activeDistrictFilter = null;
+        let currentListType = 'restaurants';
 
         // ===== 時刻ベースのダークモード判定 =====
         function checkTimeMode() {
@@ -1466,8 +1533,43 @@
             }
         }
 
-        // ===== ジャンル選択時の処理 =====
+        // ===== ページ読み込み時のイベント設定 =====
         document.addEventListener('DOMContentLoaded', function() {
+            // リスト切り替えタブ
+            document.querySelectorAll('.list-tab').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.list-tab').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentListType = this.dataset.list;
+                    updateGallery();
+                });
+            });
+
+            // ジャンルフィルター
+            document.querySelectorAll('#genreFilters .filter-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('#genreFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    activeGenreFilter = this.dataset.filter;
+                    applyAllFilters();
+                });
+            });
+
+            // 「すべての地域」ボタン
+            const allDistrictsBtn = document.querySelector('#districtFilters button[data-filter="all"]');
+            if (allDistrictsBtn) {
+                allDistrictsBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('#districtFilters .filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    activeDistrictFilter = null;
+                    applyAllFilters();
+                });
+            }
+
+            // ジャンル select
             const genreSelect = document.getElementById('formGenreSelect');
             if (genreSelect) {
                 genreSelect.addEventListener('change', function() {
@@ -1477,6 +1579,14 @@
                 });
             }
         });
+
+        // ===== 新規リスト追加ダイアログ =====
+        window.addNewList = function() {
+            const listName = prompt('新しいリストの名前を入力してください：\n（例：行きたい宿、旅行スポット）');
+            if (listName && listName.trim()) {
+                alert(`✅ 「${listName}」リストを追加しました！\n\n※ この機能は今後実装予定です。\n現在は「飲食店」「宿泊施設」「旅行スポット」の\n3つのリストでご利用ください。`);
+            }
+        };
 
         // ===== ジャンル取得 =====
         function getGenreValue() {
@@ -1492,7 +1602,8 @@
             });
             
             const filterContainer = document.getElementById('districtFilters');
-            const existingButtons = filterContainer.querySelectorAll('button[data-filter!="all"]');
+            // 「すべての地域」以外のボタンを削除
+            const existingButtons = Array.from(filterContainer.querySelectorAll('button')).filter(btn => btn.textContent !== 'すべての地域');
             existingButtons.forEach(btn => btn.remove());
             
             Array.from(districts).sort().forEach(district => {
@@ -1504,7 +1615,7 @@
                     e.preventDefault();
                     document.querySelectorAll('#districtFilters .filter-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    activeDistrictFilter = district === 'すべての地域' ? null : district;
+                    activeDistrictFilter = district;
                     applyAllFilters();
                 });
                 filterContainer.appendChild(btn);
@@ -1530,18 +1641,7 @@
             applyAllFilters(searchText);
         });
 
-        // ===== ジャンルフィルター =====
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('#genreFilters .filter-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.querySelectorAll('#genreFilters .filter-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    activeGenreFilter = this.dataset.filter;
-                    applyAllFilters();
-                });
-            });
-        });
+
 
         // ===== すべてのフィルターを適用 =====
         function applyAllFilters(searchText = '') {
