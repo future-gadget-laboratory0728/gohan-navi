@@ -1433,7 +1433,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-icon">🚃</span>
-                            <div>${restaurant.station}</div>
+                            <a href="jorudan://station?name=${encodeURIComponent(restaurant.station)}" class="tap-link">${restaurant.station}</a>
                         </div>
                         <div class="info-row">
                             <span class="info-icon">💰</span>
