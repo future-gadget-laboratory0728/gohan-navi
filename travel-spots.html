@@ -1278,6 +1278,31 @@
         let activeDistrictFilter = null;
         let currentListType = 'restaurants';
 
+        // ===== 乗換案内アプリを開く =====
+        window.openJorudan = function(stationName) {
+            // iPhone版ジョルダンのURLスキーム
+            const iosURL = `jorudan://station?station=${encodeURIComponent(stationName)}`;
+            // Webサイトのフォールバック
+            const webURL = `https://www.jorudan.co.jp/norikae/cgi/norikeisan.html?eki=${encodeURIComponent(stationName)}&search_type=1`;
+            
+            // iOSかAndroidか判定
+            const userAgent = navigator.userAgent.toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(userAgent);
+            
+            if (isIOS) {
+                // iOSの場合
+                window.location.href = iosURL;
+                
+                // 2秒後にアプリが開かなかった場合はWebにフォールバック
+                setTimeout(function() {
+                    window.location.href = webURL;
+                }, 2000);
+            } else {
+                // Android以外はWebで開く
+                window.location.href = webURL;
+            }
+        };
+
         // ===== 時刻ベースのダークモード判定 =====
         function checkTimeMode() {
             const now = new Date();
@@ -1433,7 +1458,7 @@
                         </div>
                         <div class="info-row">
                             <span class="info-icon">🚃</span>
-                            <a href="jorudan://station?name=${encodeURIComponent(restaurant.station)}" class="tap-link">${restaurant.station}</a>
+                            <a href="javascript:void(0)" onclick="openJorudan('${restaurant.station}')" class="tap-link">${restaurant.station}</a>
                         </div>
                         <div class="info-row">
                             <span class="info-icon">💰</span>
@@ -1658,7 +1683,9 @@
 
                 // ジャンルフィルター
                 if (show && activeGenreFilter !== 'all') {
-                    show = card.dataset.genre === activeGenreFilter;
+                    // activeGenreFilter は "category-temple" などの形式なので、restaurant.genre と比較
+                    const filterGenre = activeGenreFilter.replace('category-', '').replace('genre-', '');
+                    show = card.dataset.genre === filterGenre;
                 }
 
                 // 地域フィルター
@@ -1668,6 +1695,7 @@
 
                 card.style.display = show ? '' : 'none';
             });
+            
             renderRestaurants();
         }
 
